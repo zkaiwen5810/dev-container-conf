@@ -1,0 +1,44 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/java
+{
+	"name": "spring-framework",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"image": "mcr.microsoft.com/devcontainers/java:1-17-bookworm",
+
+	"workspaceMount": "source=spring-framework,target=/spring,type=volume",
+	"workspaceFolder": "/spring", // 用vscode作ide的话，目录名字要和settings.gradle里的项目名字一样
+
+	"mounts": [
+		{
+			"source": "gradle",
+			"target": "/root/.gradle", // 如何把用一个变量代替硬编码的家目录
+			"type": "volume"
+		}
+	],
+
+	"features": {
+		"ghcr.io/devcontainers/features/java:1": {
+			"version": "none",
+			"installMaven": "false",
+			"installGradle": "true"
+		}
+	},
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	// "postCreateCommand": "java -version",
+
+	// Configure tool-specific properties.
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"vscjava.vscode-gradle"
+			]
+		}
+	},
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	"remoteUser": "root"
+}
