@@ -1,15 +1,19 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/typescript-node
+// README at: https://github.com/devcontainers/templates/tree/main/src/cpp
 {
-	"name": "lobe-chat",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+	"name": "Bitcoin",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
 	"features": {
-		"ghcr.io/devcontainers-extra/features/pnpm:2": {"version": "9.12.2"}
+		"ghcr.io/devcontainers/features/python:1": {
+			"version": "3.10"
+		}
 	},
 
-	"workspaceMount": "source=lobe-chat,target=/workspace,type=volume",
+	"workspaceMount": "source=bitcoin,target=/workspace,type=volume",
 	"workspaceFolder": "/workspace",
+
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
 
@@ -17,7 +21,7 @@
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "corepack enable && pnpm install",
+	// "postCreateCommand": "gcc -v",
 
 	// Configure tool-specific properties.
 	"customizations": {
