@@ -1,0 +1,33 @@
+name: sunnyside
+services:
+  devcontainer:
+    image: mcr.microsoft.com/devcontainers/python:1-bookworm
+    network_mode: service:db
+    volumes:
+      - type: volume
+        source: quant101
+        target: /workspace
+      - type: volume
+        source: lib-py3.13
+        target: /usr/local/lib/python3.13
+    entrypoint: sleep infinity
+  db:
+    image: postgres:17
+    volumes:
+      - type: volume
+        source: sunnyside-db
+        target: /var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: sunnyside
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: passw0rd
+
+volumes:
+  quant101:
+    name: quant101
+    external: true
+  lib-py3.13:
+    name: lib-py3.13
+    external: true
+  sunnyside-db:
+    name: sunnyside-db
