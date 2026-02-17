@@ -1,0 +1,57 @@
+{
+  "name": "openclaw",
+
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": { "NODE_MAJOR": "22" }
+  },
+
+  "remoteUser": "vscode",
+  "updateRemoteUserUID": true,
+
+  // ✅ 核心：把工作区放到 Docker named volume（不 bind mount 本地源码）
+  "workspaceMount": "source=openclaw-src,target=/workspaces/openclaw,type=volume",
+  "workspaceFolder": "/workspaces/openclaw",
+
+  // ✅ AI Coding CLIs（外挂 Feature）
+  "features": {
+    "ghcr.io/zkaiwen5810/features/ai-coding-cli:latest": {
+      "nodeMajor": "22",
+      "installZsh": true,
+      "installZshrc": true
+    }
+  },
+
+  // ✅ 运行时注入 key：读取“本地 stub 仓库”根目录的 .devcontainer.env
+  // （不会影响 Docker build cache）
+  "runArgs": ["--env-file", "${localWorkspaceFolder}/.devcontainer.env"],
+
+  // ✅ 持久化：pnpm store + AI CLI 配置/历史/缓存（目录级持久化）
+  "mounts": [
+    "source=pnpm-store,target=/home/vscode/.pnpm-store,type=volume",
+
+    "source=codex-home,target=/home/vscode/.codex,type=volume",
+    "source=opencode-config,target=/home/vscode/.config/opencode,type=volume",
+    "source=opencode-share,target=/home/vscode/.local/share/opencode,type=volume",
+
+    "source=claude-home,target=/home/vscode/.claude,type=volume",
+    "source=claude-config,target=/home/vscode/.config/claude,type=volume",
+    "source=claude-cache,target=/home/vscode/.cache/claude,type=volume"
+  ],
+
+  "containerEnv": {
+    "PNPM_STORE_DIR": "/home/vscode/.pnpm-store",
+    "SHELL": "/usr/bin/zsh"
+  },
+
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh"
+      }
+    }
+  },
+
+  // ✅ 你要求“容器启动后我手动 clone”
+  "postCreateCommand": "bash -lc 'echo \"\\nWorkspace is a Docker volume: /workspaces/openclaw\\nFirst-time setup (run once):\\n  cd /workspaces/openclaw\\n  git clone https://github.com/openclaw/openclaw.git .\\n  corepack prepare pnpm@10.23.0 --activate\\n  pnpm install\\n\\nThen (per project scripts):\\n  pnpm ui:build\\n  pnpm build\\n  pnpm gateway:watch\\n\"'"
+}
