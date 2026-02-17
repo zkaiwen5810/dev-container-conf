@@ -53,5 +53,5 @@
   },
 
   // ✅ 你要求“容器启动后我手动 clone”
-  "postCreateCommand": "bash -lc 'echo \"\\nWorkspace is a Docker volume: /workspaces/openclaw\\nFirst-time setup (run once):\\n  cd /workspaces/openclaw\\n  git clone https://github.com/openclaw/openclaw.git .\\n  corepack prepare pnpm@10.23.0 --activate\\n  pnpm install\\n\\nThen (per project scripts):\\n  pnpm ui:build\\n  pnpm build\\n  pnpm gateway:watch\\n\"'"
+  "postCreateCommand": "bash -lc 'sudo chown -R vscode:vscode /home/vscode/.pnpm-store /home/vscode/.codex /home/vscode/.config /home/vscode/.local /home/vscode/.claude /home/vscode/.cache ; echo \"\\nWorkspace is a Docker volume: /workspaces/openclaw\\nFirst-time setup (run once):\\n  cd /workspaces/openclaw\\n  git clone https://github.com/openclaw/openclaw.git .\\n  corepack prepare pnpm@10.23.0 --activate\\n  pnpm install\\n\\nThen (per project scripts):\\n  pnpm ui:build\\n  pnpm build\\n  pnpm gateway:watch\\n\"'"
 }
