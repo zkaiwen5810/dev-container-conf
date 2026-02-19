@@ -36,7 +36,9 @@
 
     "source=claude-home,target=/home/vscode/.claude,type=volume",
     "source=claude-config,target=/home/vscode/.config/claude,type=volume",
-    "source=claude-cache,target=/home/vscode/.cache/claude,type=volume"
+    "source=claude-cache,target=/home/vscode/.cache/claude,type=volume",
+
+    "source=openclaw_persist,target=/home/vscode/.persist,type=volume"
   ],
 
   "containerEnv": {
@@ -53,5 +55,9 @@
   },
 
   // ✅ 你要求“容器启动后我手动 clone”
-  "postCreateCommand": "bash -lc 'sudo chown -R vscode:vscode /home/vscode/.pnpm-store /home/vscode/.codex /home/vscode/.config /home/vscode/.local /home/vscode/.claude /home/vscode/.cache ; echo \"\\nWorkspace is a Docker volume: /workspaces/openclaw\\nFirst-time setup (run once):\\n  cd /workspaces/openclaw\\n  git clone https://github.com/openclaw/openclaw.git .\\n  corepack prepare pnpm@10.23.0 --activate\\n  pnpm install\\n\\nThen (per project scripts):\\n  pnpm ui:build\\n  pnpm build\\n  pnpm gateway:watch\\n\"'"
+  "postCreateCommand": [
+    "bash",
+    "-lc",
+    "set -euo pipefail; sudo chown -R \"$(id -u)\":\"$(id -g)\" \"$HOME/.pnpm-store\" \"$HOME/.codex\" \"$HOME/.config\" \"$HOME/.local\" \"$HOME/.claude\" \"$HOME/.cache\" \"$HOME/.persist\"; PERSIST_DIR=\"$HOME/.persist\"; PERSIST_FILE=\"$PERSIST_DIR/.claude.json\"; TARGET_FILE=\"$HOME/.claude.json\"; mkdir -p \"$PERSIST_DIR\"; [ -f \"$PERSIST_FILE\" ] || printf '{}\\n' > \"$PERSIST_FILE\"; [ -L \"$TARGET_FILE\" ] || (rm -f \"$TARGET_FILE\" && ln -s \"$PERSIST_FILE\" \"$TARGET_FILE\")"
+  ]
 }
