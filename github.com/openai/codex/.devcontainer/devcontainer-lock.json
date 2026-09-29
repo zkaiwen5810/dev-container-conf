@@ -1,0 +1,9 @@
+{
+  "features": {
+    "ghcr.io/zkaiwen5810/features/ai-coding-cli:0.2.7": {
+      "version": "0.2.7",
+      "resolved": "ghcr.io/zkaiwen5810/features/ai-coding-cli@sha256:098c87169246f9a1da550a975b3d3b2434cdc2d5dab832ea620b0792429571be",
+      "integrity": "sha256:098c87169246f9a1da550a975b3d3b2434cdc2d5dab832ea620b0792429571be"
+    }
+  }
+}
