@@ -16,6 +16,23 @@ Run the setup script again after changing branches or dependency lockfiles. It u
 
 The image includes Node 22, Rust 1.95.0 with rustfmt/clippy/rust-src, pnpm 10.34.5, just, DotSlash, nextest, uv, and native compilation dependencies. This covers the Cargo development workflow and Python/JS maintenance tooling. Bazel, cross-compilation toolchains, and release packaging are not provisioned. Start with targeted crate tests rather than the full workspace. Large Rust builds need substantial Docker disk and RAM; resource limits are left to Docker Desktop.
 
+## Editor memory and connection recovery
+
+The full Codex Rust workspace can use substantial memory during indexing. This configuration starts Rust Analyzer with two analysis threads, disables eager cache priming, and reduces its syntax-tree LRU capacity to 64. It also disables checks on save, build scripts, and procedural-macro expansion. Generated-code completion and diagnostics are consequently incomplete. These are reduced-work settings, not a hard memory limit. Build output and dependency directories are excluded from file watching and text search; those exclusions do not control Rust Analyzer's dependency analysis.
+
+`CARGO_BUILD_JOBS=2` limits concurrent Cargo compilation jobs. The same value is supplied through Rust Analyzer's `cargo.extraEnv` so its Cargo subprocesses receive it too. This does not limit the analyzer's total memory. Run targeted checks manually, for example `cargo check --locked -j 2 -p codex-cli` from `codex-rs`.
+
+If indexing causes disconnections:
+
+1. Check Docker/WSL memory and kernel OOM logs. An observed failure on this host killed Rust Analyzer at approximately 8.6 GiB resident memory; the 16 GB Windows host also had about 390 MiB free. High CPU alone was not the underlying failure.
+2. Apply these `customizations.vscode.settings` values to the existing container's **Remote Settings (JSON)** and reload the VS Code window. Workspace settings can override remote settings. Editing the local devcontainer file alone does not reliably update an already-created container's editor settings.
+3. For future containers, the settings are already included here. **Dev Containers: Rebuild Container** also applies the container environment change and reuses unchanged Docker image layers. Do not select the no-cache rebuild option for this issue.
+4. Free memory by stopping unused workloads. If Docker responds, reconnect to the affected container before considering a Docker/WSL restart, which interrupts other containers. Increasing WSL's allocation beyond 12 GB on a 16 GB host can worsen Windows memory pressure.
+
+Once stable, enable `rust-analyzer.cargo.buildScripts.enable`, then `rust-analyzer.procMacro.enable`, monitoring memory after each change. Full analysis may require more RAM; if the reduced settings still exhaust memory, disable the Rust Analyzer extension for this workspace and use manual targeted Cargo checks until more memory is available.
+
+Settings reference: [Rust Analyzer configuration](https://rust-analyzer.github.io/book/configuration) and [Cargo environment variables](https://doc.rust-lang.org/cargo/reference/environment-variables.html).
+
 ## Cache design
 
 * **Docker layers:** no source, manifests, lockfiles, or scripts are copied into the image. `.dockerignore` allows only the Dockerfile and itself. Source edits, dependency changes, credentials, and lifecycle-script edits cannot invalidate tool installation layers. The configuration directory is mounted read-only at runtime.
@@ -126,7 +143,7 @@ Reference: `C:/Users/dsens/Codebase/claude-code-2_1_88/.devcontainer/` (`devcont
 
 `pkg-config`, OpenSSL headers, CMake, Clang, and libclang follow upstream's Nix development shell; libcap headers follow its Linux package definition. `CC=clang` and `CXX=clang++` follow its BoringSSL compiler choice. Rust comes from a versioned official Rust image, with the toolchain writable by the development user so a changed checkout can request a newer version. Additional toolchains installed at runtime are not persisted across image rebuilds; update the Dockerfile Rust pin when adopting a new baseline.
 
-just, DotSlash, and nextest support the documented build/test/format helpers. uv supports `scripts/format.py` and the Python SDK. Corepack uses a shared image directory so pnpm prepared during the root build is also available to `node`; bootstrap repairs tool-directory ownership if UID remapping changes the user and activates Corepack in the base image's global npm bin directory. Run the post-create script before using a bare Docker image outside Dev Containers, since that bypasses lifecycle initialization. Rust Analyzer and TOML editor extensions are lightweight editor conveniences; `linkedProjects` points at the nested Cargo workspace.
+just, DotSlash, and nextest support the documented build/test/format helpers. uv supports `scripts/format.py` and the Python SDK. Corepack uses a shared image directory so pnpm prepared during the root build is also available to `node`; bootstrap repairs tool-directory ownership if UID remapping changes the user and activates Corepack in the base image's global npm bin directory. Run the post-create script before using a bare Docker image outside Dev Containers, since that bypasses lifecycle initialization. Rust Analyzer and TOML extensions provide editor support; `linkedProjects` points at the nested Cargo workspace. Rust Analyzer can be memory-intensive on this workspace; the reduced analysis defaults and their tradeoffs are documented above.
 
 `devcontainer-lock.json`, generated by the Dev Containers CLI, records the resolved AI feature digest. Keep it with the configuration when copying this stub; use the CLI's feature-upgrade workflow when deliberately updating the feature.
 

@@ -33,6 +33,7 @@
   "containerEnv": {
     "npm_config_store_dir": "/home/node/.pnpm-store",
     "UV_CACHE_DIR": "/home/node/.cache/uv",
+    "CARGO_BUILD_JOBS": "2",
     "SHELL": "/usr/bin/zsh"
   },
   "postCreateCommand": "bash /opt/devcontainer-config/post-create.sh",
@@ -41,7 +42,28 @@
       "extensions": ["rust-lang.rust-analyzer", "tamasfe.even-better-toml"],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "zsh",
-        "rust-analyzer.linkedProjects": ["codex-rs/Cargo.toml"]
+        "rust-analyzer.linkedProjects": ["codex-rs/Cargo.toml"],
+        "rust-analyzer.numThreads": 2,
+        "rust-analyzer.cachePriming.enable": false,
+        "rust-analyzer.lru.capacity": 64,
+        "rust-analyzer.checkOnSave": false,
+        "rust-analyzer.cargo.buildScripts.enable": false,
+        "rust-analyzer.procMacro.enable": false,
+        "rust-analyzer.cargo.extraEnv": {
+          "CARGO_BUILD_JOBS": "2"
+        },
+        "files.watcherExclude": {
+          "**/target/**": true,
+          "**/node_modules/**": true,
+          "**/.venv/**": true,
+          "**/bazel-*/**": true
+        },
+        "search.exclude": {
+          "**/target/**": true,
+          "**/node_modules/**": true,
+          "**/.venv/**": true,
+          "**/bazel-*/**": true
+        }
       }
     }
   }
