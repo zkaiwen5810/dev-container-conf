@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dev Container Configuration"
+  short_description: "Create cached devcontainers with shared AI settings"
+  default_prompt: "Use $devcontainer-config to create a Dev Container configuration set for this repository."
