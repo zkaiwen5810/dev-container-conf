@@ -25,6 +25,16 @@ The reference maps `codex-home` to `$HOME/.codex`, `claude-home` to `$HOME/.clau
 
 Persist single-file settings such as Claude's `$HOME/.claude.json` via a file inside a mounted directory and a symlink. Preserve existing content and wrong-target symlinks with a backup before migration; never replace settings with an empty object or overwrite an existing persisted file. Make migration repeatable. Do not bake credentials into images or copy agent state into the repository. Shared volumes are daemon-local; do not imply automatic synchronization across Docker hosts.
 
+## Codex Linux sandbox
+
+When the AI Feature installs Codex in a Linux container, include the distribution's `bubblewrap` package unless the base image already provides it. A working `codex --version` does not verify sandbox readiness. Inspect the installed CLI's `codex sandbox --help` before choosing the probe command: current versions accept commands directly after `sandbox`, while older versions used an OS subcommand.
+
+Reproduce namespace failures as `remoteUser` under the actual Docker runtime options. On the tested Windows Docker Desktop Linux host, default seccomp blocked namespace creation; installing Debian bubblewrap and adding `runArgs: ["--security-opt", "seccomp=unconfined"]` restored normal Codex sandbox execution without privileged mode or extra capabilities. Treat this as a conditional, verified remedy rather than a universal default. Explain that it relaxes Docker's outer syscall filter while retaining Codex's inner sandbox. Prefer a suitable narrower profile when available, and add capabilities or AppArmor changes only when evidence requires them. Do not change global host security settings as a routine fix.
+
+Verify the actual filesystem and network boundaries: workspace writes must succeed, writes to an otherwise writable directory outside the workspace must fail, and networking must be denied when that policy is selected. Use an isolated temporary Codex configuration under the remote user's home, outside `/tmp`, because Codex may refuse to create helper aliases in a temporary-system directory. Do not modify shared agent preferences or require model calls for this probe. Recognize expected Linux denial errors (`EACCES`, `EPERM`, and filesystem `EROFS`); unrelated execution failures are not evidence of working isolation. Where sandbox operation is part of readiness, serialize this probe after ownership repair and fail clearly when it cannot run.
+
+Do not silently work around a broken sandbox with `danger-full-access`, a sandbox-bypass flag, a global configuration change, or a replacement `codex` launcher. A reference's separately named full-access launcher is an explicit fallback, not proof that normal sandboxing works; include such a fallback only when the user's requested isolation model authorizes it. Keep normal `codex` sandbox behavior intact when the request is to fix sandboxing.
+
 ## Fast rebuilds and dependency setup
 
 Separate stable image tool installation from frequently changing repository dependency setup. Keep the build context small using an appropriate context path or `.dockerignore`; ensure required build files remain included. Changes to source code should not invalidate stable tooling layers.
